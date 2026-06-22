@@ -1,0 +1,30 @@
+:concurrency: 5
+:queues:
+  - critical
+  - default
+  - low
+
+:schedule:
+  sync_accounts:
+    cron: "0 * * * *"
+    class: SyncAccountsJob
+    args: [1]
+    description: "Sync Qonto balance every hour"
+
+  sync_invoices:
+    cron: "0 */6 * * *"
+    class: SyncInvoicesJob
+    args: [1]
+    description: "Sync Tiime invoices every 6 hours"
+
+  sync_projects:
+    cron: "0 */6 * * *"
+    class: SyncProjectsJob
+    args: [1]
+    description: "Sync Notion projects every 6 hours"
+
+  daily_summary:
+    cron: "0 8 * * *"
+    class: DailySummaryJob
+    args: [1]
+    description: "Send daily Jarvis summary at 8am"
