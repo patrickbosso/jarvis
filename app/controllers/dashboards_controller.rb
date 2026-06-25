@@ -15,5 +15,14 @@ class DashboardsController < ApplicationController
 
     @suggestion = current_user.transfer_suggestions.pending.order(suggested_at: :desc).first
     @budget_rule = current_user.budget_rule
+
+    paid_this_year = current_user.invoices.paid.this_year.to_a
+    @ca_ytd = paid_this_year.sum(&:amount_cents)
+    @ca_year_target = @budget_rule ? @budget_rule.salary_target_cents * 12 : 0
+    @ca_year_pct = @ca_year_target > 0 ? [(@ca_ytd.to_f / @ca_year_target * 100).round(1), 100].min : 0
+    @ca_by_month = paid_this_year.group_by { |inv| inv.issued_at.month }
+                                 .transform_values { |invs| invs.sum(&:amount_cents) }
+    current_month = Date.today.month
+    @ca_monthly_forecast = current_month > 0 ? (@ca_ytd / current_month) : 0
   end
 end

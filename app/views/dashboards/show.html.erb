@@ -1,127 +1,228 @@
-<div class="space-y-8">
-  <h1 class="text-3xl font-bold text-white">Bonjour, Baptiste 👋</h1>
+<% content_for :breadcrumb, "Vue d'ensemble" %>
 
-  <%# Zone 1 — Studio %>
-  <section>
-    <h2 class="text-lg font-semibold text-gray-400 uppercase tracking-wider mb-4">Studio</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">CA du mois</p>
-        <p class="text-2xl font-bold text-green-400"><%= number_to_currency(@ca_month / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
+<%# ===== Title row ===== %>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+  <h1 class="snow-page-title" style="margin:0; font-size:14px;">Vue d'ensemble</h1>
+  <span class="snow-btn"><%= l(Date.today, format: "%d %B %Y") %> ▾</span>
+</div>
+
+<%# ===== KPI cards ===== %>
+<%
+  kpis = [
+    { label: "CA réalisé #{Date.today.year}", value: @ca_ytd,        tint: "blue",
+      delta: "#{@ca_year_pct}%", dir: (@ca_year_pct >= 100 ? :up : :flat), note: "de l'objectif" },
+    { label: "CA du mois", value: @ca_month, tint: "purple",
+      delta: "#{@invoices_paid_this_month.count}", dir: :up, note: "encaissée(s)" },
+    { label: "Prévisionnel", value: @ca_previsionnel, tint: "blue",
+      delta: "#{@invoices_sent.count}", dir: :flat, note: "en attente" },
+    { label: "En retard", value: @ca_overdue, tint: "purple",
+      delta: "#{@invoices_overdue.count}", dir: (@ca_overdue > 0 ? :down : :flat), note: "impayée(s)" }
+  ]
+%>
+<div class="snow-kpi-grid">
+  <% kpis.each do |k| %>
+    <div class="snow-kpi snow-kpi--<%= k[:tint] %>">
+      <div class="snow-kpi-label"><%= k[:label] %></div>
+      <div class="snow-kpi-row">
+        <span class="snow-kpi-value"><%= eur(k[:value]) %></span>
+        <span class="snow-delta">
+          <span class="<%= k[:dir] == :down ? 'neg' : (k[:dir] == :up ? 'pos' : '') %>">
+            <%= k[:delta] %> <%= k[:dir] == :up ? "↑" : (k[:dir] == :down ? "↓" : "") %>
+          </span>
+        </span>
       </div>
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">CA prévisionnel</p>
-        <p class="text-2xl font-bold text-blue-400"><%= number_to_currency(@ca_previsionnel / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
-      </div>
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">Factures en retard</p>
-        <p class="text-2xl font-bold <%= @ca_overdue > 0 ? 'text-red-400' : 'text-gray-500' %>">
-          <%= number_to_currency(@ca_overdue / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %>
-        </p>
-        <% if @invoices_overdue.any? %>
-          <span class="text-xs text-red-400"><%= @invoices_overdue.count %> facture(s)</span>
-        <% end %>
+      <div style="font-size:12px; color:var(--ink-40);"><%= k[:note] %></div>
+    </div>
+  <% end %>
+</div>
+
+<%# ===== Bar chart + Donut ===== %>
+<%
+  months_fr = %w[Jan Fév Mar Avr Mai Jun Jul Aoû Sep Oct Nov Déc]
+  current_month = Date.today.month
+  max_monthly = [(@ca_by_month.values.max || 0), @ca_monthly_forecast, 1].max
+%>
+<div class="snow-grid cols-2">
+  <%# Bar chart %>
+  <div class="snow-panel">
+    <div class="snow-panel-head">
+      <span class="snow-panel-title">Chiffre d'affaires · <%= Date.today.year %></span>
+      <div class="snow-legend">
+        <span><i style="background:var(--accent-blue);"></i>Réalisé</span>
+        <span><i style="background:var(--accent-blue); opacity:.4;"></i>Prévisionnel</span>
       </div>
     </div>
-
-    <div class="bg-gray-900 rounded-xl border border-gray-800 overflow-hidden">
-      <div class="px-5 py-3 border-b border-gray-800">
-        <h3 class="font-medium text-gray-200">Projets en cours</h3>
-      </div>
-      <% if @projects_active.any? %>
-        <ul class="divide-y divide-gray-800">
-          <% @projects_active.each do |project| %>
-            <li class="px-5 py-3 flex items-center justify-between">
-              <div>
-                <p class="font-medium text-white"><%= project.title %></p>
-                <p class="text-sm text-gray-400"><%= project.client_name %></p>
-              </div>
-              <span class="inline-block px-2 py-1 rounded-full text-xs font-medium <%= status_badge_class(project.status) %>">
-                <%= project.current_step.presence || project.status.humanize %>
-              </span>
-            </li>
-          <% end %>
-        </ul>
-      <% else %>
-        <p class="px-5 py-4 text-gray-500 text-sm">Aucun projet actif.</p>
+    <div class="snow-bars">
+      <% (1..12).each do |m| %>
+        <% is_future = m > current_month %>
+        <% amount = is_future ? @ca_monthly_forecast : (@ca_by_month[m] || 0) %>
+        <% pct = [(amount.to_f / max_monthly * 100).round, 1].max %>
+        <div class="snow-bar-col">
+          <div class="snow-bar-stack">
+            <div class="snow-bar <%= is_future ? 'forecast' : 'actual' %>" style="height: <%= pct %>%;"
+                 title="<%= months_fr[m-1] %> · <%= eur(amount) %>"></div>
+          </div>
+          <span class="snow-bar-label" style="<%= 'font-weight:600;color:var(--ink);' if m == current_month %>"><%= months_fr[m-1] %></span>
+        </div>
       <% end %>
     </div>
-  </section>
+  </div>
 
-  <%# Zone 2 — Finances %>
-  <section>
-    <h2 class="text-lg font-semibold text-gray-400 uppercase tracking-wider mb-4">Finances</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">Qonto SAS</p>
-        <% if @qonto %>
-          <p class="text-2xl font-bold text-white"><%= number_to_currency(@qonto.balance_cents / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
-          <p class="text-xs text-gray-500 mt-1">Mis à jour il y a <%= time_ago_in_words(@qonto.fetched_at) %></p>
-        <% else %>
-          <p class="text-gray-500 text-sm">Non connecté</p>
-        <% end %>
-      </div>
-
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">Compte perso SG</p>
-        <% if @sg_perso %>
-          <p class="text-2xl font-bold text-white"><%= number_to_currency(@sg_perso.balance_cents / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
-          <p class="text-xs text-gray-500 mt-1">Mis à jour il y a <%= time_ago_in_words(@sg_perso.fetched_at) %></p>
-        <% else %>
-          <p class="text-gray-500 text-sm">Non connecté</p>
-        <% end %>
-      </div>
-
-      <div class="bg-gray-900 rounded-xl p-5 border border-gray-800">
-        <p class="text-sm text-gray-400 mb-1">PEA Trade Republic</p>
-        <% if @pea %>
-          <p class="text-2xl font-bold text-white"><%= number_to_currency(@pea.balance_cents / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
-          <p class="text-xs text-gray-500 mt-1">Mis à jour il y a <%= time_ago_in_words(@pea.fetched_at) %></p>
-        <% else %>
-          <p class="text-gray-500 text-sm">Non connecté</p>
-        <% end %>
-      </div>
-    </div>
-
-    <% if @budget_rule %>
-      <div class="mt-4 bg-gray-900 rounded-xl p-5 border border-gray-800 inline-block">
-        <p class="text-sm text-gray-400 mb-1">Crédit immo mensuel</p>
-        <p class="text-xl font-bold text-white"><%= number_to_currency(@budget_rule.mortgage_amount_cents / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></p>
-      </div>
-    <% end %>
-  </section>
-
-  <%# Zone 3 — Jarvis %>
-  <section>
-    <h2 class="text-lg font-semibold text-gray-400 uppercase tracking-wider mb-4">Jarvis — Suggestions du jour</h2>
-
-    <% if @suggestion %>
-      <div class="bg-gray-900 rounded-xl border border-indigo-800 p-6">
-        <p class="text-gray-300 mb-4">Voici les virements suggérés basés sur ton solde actuel :</p>
-
-        <ul class="space-y-3 mb-6">
-          <% @suggestion.transfers.each do |transfer| %>
-            <li class="flex items-center justify-between bg-gray-800 rounded-lg px-4 py-3">
-              <span class="text-gray-200"><%= transfer["label"] %></span>
-              <span class="font-bold text-white"><%= number_to_currency(transfer["amount_cents"].to_i / 100.0, unit: "€", separator: ",", delimiter: " ", format: "%n %u") %></span>
-            </li>
+  <%# Donut — répartition comptes %>
+  <%
+    accounts = [
+      { name: "Qonto SAS",       cents: @qonto&.balance_cents.to_i,   color: "#95A4FC" },
+      { name: "Compte SG",       cents: @sg_perso&.balance_cents.to_i, color: "#A8C5DA" },
+      { name: "PEA Trade Rep.",  cents: @pea&.balance_cents.to_i,      color: "#B1E3FF" }
+    ].select { |a| a[:cents] > 0 }
+    total = accounts.sum { |a| a[:cents] }
+    acc = 0
+    stops = accounts.map do |a|
+      from = total > 0 ? (acc.to_f / total * 360) : 0
+      acc += a[:cents]
+      to = total > 0 ? (acc.to_f / total * 360) : 0
+      "#{a[:color]} #{from.round(1)}deg #{to.round(1)}deg"
+    end.join(", ")
+  %>
+  <div class="snow-panel">
+    <div class="snow-panel-head"><span class="snow-panel-title">Répartition des comptes</span></div>
+    <% if total > 0 %>
+      <div class="snow-donut-wrap">
+        <div class="snow-donut" style="background: conic-gradient(<%= stops %>);"></div>
+        <div class="snow-list">
+          <% accounts.each do |a| %>
+            <div class="snow-list-row">
+              <span class="k"><i style="background:<%= a[:color] %>;"></i><%= a[:name] %></span>
+              <span class="v"><%= (a[:cents].to_f / total * 100).round(1) %>%</span>
+            </div>
           <% end %>
-        </ul>
-
-        <div class="flex gap-3">
-          <%= button_to "✓ Valider", transfer_suggestion_path(@suggestion), method: :patch, params: { action_type: "validate" }, class: "px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition cursor-pointer" %>
-          <%= button_to "Ignorer", transfer_suggestion_path(@suggestion), method: :patch, params: { action_type: "dismiss" }, class: "px-5 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg font-medium transition cursor-pointer" %>
+          <div class="snow-list-row" style="border-top:1px solid var(--line); padding-top:12px;">
+            <span class="k">Total</span><span class="v"><%= eur(total) %></span>
+          </div>
         </div>
       </div>
     <% else %>
-      <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 text-center">
-        <p class="text-gray-500">Aucune suggestion en attente.</p>
-        <% unless @budget_rule %>
-          <p class="text-sm text-yellow-400 mt-2">
-            <%= link_to "Configurez vos règles budgétaires", edit_budget_rule_path, class: "underline" %> pour recevoir des suggestions.
-          </p>
+      <p style="font-size:13px; color:var(--ink-40);">Aucun compte connecté.</p>
+    <% end %>
+  </div>
+</div>
+
+<%# ===== Projects table + Jarvis suggestion ===== %>
+<div class="snow-grid cols-2">
+  <%# Projects %>
+  <div class="snow-panel">
+    <div class="snow-panel-head">
+      <span class="snow-panel-title">Projets en cours</span>
+      <span style="font-size:12px; color:var(--ink-40);"><%= @projects_active.count %></span>
+    </div>
+    <% if @projects_active.any? %>
+      <table class="snow-table">
+        <thead><tr><th>Projet</th><th>Client</th><th>Étape</th></tr></thead>
+        <tbody>
+          <% @projects_active.each do |project| %>
+            <tr>
+              <td style="font-weight:500;"><%= project.title %></td>
+              <td style="color:var(--ink-40);"><%= project.client_name %></td>
+              <td>
+                <span class="snow-pill"><i style="background:<%= avatar_color(project.title) %>;"></i>
+                  <%= project.current_step.presence || project.status %>
+                </span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% else %>
+      <p style="font-size:13px; color:var(--ink-40);">Aucun projet actif.</p>
+    <% end %>
+  </div>
+
+  <%# Jarvis suggestion %>
+  <div class="snow-panel">
+    <div class="snow-panel-head"><span class="snow-panel-title">Jarvis · Suggestion</span></div>
+    <% if @suggestion %>
+      <div style="display:flex; flex-direction:column; gap:12px;">
+        <% @suggestion.transfers.each do |transfer| %>
+          <div class="snow-list-row">
+            <span class="k"><%= transfer["label"] %></span>
+            <span class="v"><%= eur(transfer["amount_cents"]) %></span>
+          </div>
         <% end %>
       </div>
+      <div style="display:flex; gap:8px; margin-top:18px;">
+        <%= button_to "Valider", transfer_suggestion_path(@suggestion), method: :patch,
+              params: { action_type: "validate" }, class: "snow-btn snow-btn--ink", form: { style: "margin:0;" } %>
+        <%= button_to "Ignorer", transfer_suggestion_path(@suggestion), method: :patch,
+              params: { action_type: "dismiss" }, class: "snow-btn", form: { style: "margin:0;" } %>
+      </div>
+    <% else %>
+      <p style="font-size:13px; color:var(--ink-40);">Aucune suggestion en attente.</p>
+      <% unless @budget_rule %>
+        <%= link_to "Configurer les règles budgétaires →", edit_budget_rule_path,
+              style: "font-size:13px; color:var(--ink); text-decoration:underline; text-underline-offset:3px; margin-top:12px; display:inline-block;" %>
+      <% end %>
     <% end %>
-  </section>
+  </div>
 </div>
+
+<%# ===== Right rail ===== %>
+<% content_for :rail do %>
+  <div>
+    <div class="snow-rail-title">Notifications</div>
+    <div class="snow-feed">
+      <% if @invoices_paid_this_month.any? %>
+        <% @invoices_paid_this_month.order(issued_at: :desc).limit(4).each do |inv| %>
+          <div class="snow-feed-item">
+            <span class="snow-feed-ic mint">€</span>
+            <div class="snow-feed-body">
+              <div class="snow-feed-text">Facture encaissée · <%= eur(inv.amount_cents) %></div>
+              <div class="snow-feed-time"><%= l(inv.issued_at.to_date, format: "%d %B") %></div>
+            </div>
+          </div>
+        <% end %>
+      <% end %>
+      <% if @invoices_overdue.any? %>
+        <div class="snow-feed-item">
+          <span class="snow-feed-ic purple">!</span>
+          <div class="snow-feed-body">
+            <div class="snow-feed-text"><%= @invoices_overdue.count %> facture(s) en retard</div>
+            <div class="snow-feed-time"><%= eur(@ca_overdue) %></div>
+          </div>
+        </div>
+      <% end %>
+      <% if @invoices_sent.any? %>
+        <div class="snow-feed-item">
+          <span class="snow-feed-ic blue">↑</span>
+          <div class="snow-feed-body">
+            <div class="snow-feed-text"><%= @invoices_sent.count %> facture(s) envoyée(s)</div>
+            <div class="snow-feed-time">en attente de paiement</div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div>
+    <div class="snow-rail-title">Objectif annuel</div>
+    <div style="font-size:13px; color:var(--ink-40); margin-bottom:8px;">
+      <%= eur(@ca_ytd) %> / <%= @ca_year_target > 0 ? eur(@ca_year_target) : "—" %>
+    </div>
+    <div class="snow-hbar-track"><div class="snow-hbar-fill" style="width:<%= @ca_year_pct %>%;"></div></div>
+    <div style="font-size:12px; color:var(--ink-40); margin-top:8px;"><%= @ca_year_pct %>% atteint · mois <%= Date.today.month %>/12</div>
+  </div>
+
+  <div>
+    <div class="snow-rail-title">Clients</div>
+    <div style="display:flex; flex-direction:column; gap:12px;">
+      <% @projects_active.map(&:client_name).compact.uniq.first(6).each do |client| %>
+        <div class="snow-contact">
+          <span class="ava" style="background:<%= avatar_color(client) %>;"><%= client.to_s.first&.upcase %></span>
+          <span class="nm"><%= client %></span>
+        </div>
+      <% end %>
+      <% if @projects_active.empty? %>
+        <span style="font-size:13px; color:var(--ink-40);">Aucun client actif.</span>
+      <% end %>
+    </div>
+  </div>
+<% end %>

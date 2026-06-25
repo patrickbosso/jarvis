@@ -1,1 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Inter:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
+
+/* ============================================================
+   SnowUI design tokens (recreated from the Dashboard UI Kit)
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --snow-bg: #FFFFFF;
+  --snow-panel: #F7F9FB;        /* light grey panels */
+  --snow-panel-2: #F9F9FA;
+  --snow-hover: rgba(28, 28, 28, 0.05);
+
+  /* Ink (text) — SnowUI uses opacity on near-black */
+  --ink: #1C1C1C;
+  --ink-80: rgba(28, 28, 28, 0.80);
+  --ink-40: rgba(28, 28, 28, 0.40);
+  --ink-20: rgba(28, 28, 28, 0.20);
+  --line: rgba(28, 28, 28, 0.10);
+
+  /* KPI card tints */
+  --tint-blue: #E6F1FD;
+  --tint-purple: #EDEEFC;
+  --tint-mint: #E5ECF6;
+
+  /* Accents / data viz */
+  --accent-blue: #A8C5DA;
+  --accent-blue-strong: #4C98FD;
+  --accent-purple: #95A4FC;
+  --accent-mint: #B1E3FF;
+  --accent-ink: #1C1C1C;
+  --pos: #34C759;
+  --neg: #FF3B30;
+
+  /* legacy editorial tokens (kept for other pages) */
+  --parchment: #F5F2ED;
+  --surface: #FFFFFF;
+  --border: #E2DDD6;
+  --ink-secondary: #5C5751;
+  --ink-muted: #9E9890;
+  --green-deep: #1C4A2E;
+  --blue-deep: #1C3A5C;
+  --red-deep: #7A1F1F;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: var(--snow-bg);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-display { font-family: 'Cormorant Garamond', Georgia, serif; }
+
+/* ============================================================
+   App shell
+   ============================================================ */
+.snow-shell {
+  display: grid;
+  grid-template-columns: 212px 1fr 280px;
+  min-height: 100vh;
+  background: var(--snow-bg);
+}
+.snow-shell.no-rail { grid-template-columns: 212px 1fr; }
+@media (max-width: 1280px) { .snow-shell { grid-template-columns: 212px 1fr; } .snow-rail { display: none; } }
+@media (max-width: 860px)  { .snow-shell, .snow-shell.no-rail { grid-template-columns: 1fr; } .snow-sidebar { display: none; } }
+
+/* Sidebar -------------------------------------------------- */
+.snow-sidebar {
+  border-right: 1px solid var(--line);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--snow-bg);
+}
+.snow-brand {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 12px 16px;
+  font-weight: 600; font-size: 14px; color: var(--ink);
+}
+.snow-brand .avatar {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: linear-gradient(135deg, #95A4FC, #B1E3FF);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 12px; color: #fff; font-weight: 700;
+}
+.snow-tabs { display: flex; gap: 4px; padding: 0 4px 8px; }
+.snow-tab { font-size: 14px; color: var(--ink-40); padding: 2px 8px; cursor: pointer; }
+.snow-tab.active { color: var(--ink); }
+
+.snow-navgroup-title {
+  font-size: 14px; color: var(--ink-40);
+  padding: 12px 12px 4px;
+}
+.snow-nav { display: flex; flex-direction: column; gap: 2px; }
+.snow-nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 8px;
+  font-size: 14px; color: var(--ink); text-decoration: none;
+  position: relative; transition: background .15s;
+}
+.snow-nav-item:hover { background: var(--snow-hover); }
+.snow-nav-item.active { background: var(--snow-panel); }
+.snow-nav-item.active::before {
+  content: ""; position: absolute; left: 0; top: 8px; bottom: 8px;
+  width: 4px; border-radius: 4px; background: var(--ink);
+}
+.snow-nav-item .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-20); }
+.snow-nav-item .ic { width: 20px; text-align: center; opacity: .7; font-size: 15px; }
+
+/* Topbar --------------------------------------------------- */
+.snow-main { padding: 0; display: flex; flex-direction: column; min-width: 0; }
+.snow-topbar {
+  height: 68px; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; border-bottom: 1px solid var(--line);
+}
+.snow-breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-40); }
+.snow-breadcrumb .cur { color: var(--ink); }
+.snow-breadcrumb .ic { font-size: 16px; opacity: .7; }
+.snow-search {
+  display: flex; align-items: center; gap: 8px;
+  background: var(--snow-panel); border: 1px solid transparent;
+  border-radius: 8px; padding: 6px 10px; width: 220px; color: var(--ink-40); font-size: 14px;
+}
+.snow-search input { border: none; background: transparent; outline: none; flex: 1; font: inherit; color: var(--ink); }
+.snow-topbar-actions { display: flex; align-items: center; gap: 14px; color: var(--ink-80); }
+.snow-topbar-actions .ic { font-size: 18px; cursor: pointer; opacity: .8; }
+
+/* Content area --------------------------------------------- */
+.snow-content { padding: 28px; }
+.snow-page-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 16px; }
+
+/* ============================================================
+   KPI cards
+   ============================================================ */
+.snow-kpi-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-bottom: 28px;
+}
+@media (max-width: 1100px){ .snow-kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+.snow-kpi {
+  border-radius: 16px; padding: 24px; min-height: 112px;
+  display: flex; flex-direction: column; gap: 8px;
+  transition: transform .2s;
+}
+.snow-kpi:hover { transform: translateY(-2px); }
+.snow-kpi--blue   { background: var(--tint-blue); }
+.snow-kpi--purple { background: var(--tint-purple); }
+.snow-kpi--grey   { background: var(--snow-panel); }
+.snow-kpi-label { font-size: 14px; font-weight: 600; color: var(--ink); }
+.snow-kpi-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; }
+.snow-kpi-value { font-size: 24px; font-weight: 600; color: var(--ink); line-height: 1.2; letter-spacing: -0.01em; }
+.snow-delta { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: var(--ink); white-space: nowrap; }
+.snow-delta .pos { color: var(--pos); }
+.snow-delta .neg { color: var(--neg); }
+
+/* ============================================================
+   Panels / blocks
+   ============================================================ */
+.snow-grid { display: grid; gap: 28px; margin-bottom: 28px; }
+.snow-grid.cols-2 { grid-template-columns: 2fr 1fr; }
+.snow-grid.cols-half { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1100px){ .snow-grid.cols-2, .snow-grid.cols-half { grid-template-columns: 1fr; } }
+
+.snow-panel {
+  background: var(--snow-panel-2); border-radius: 16px; padding: 24px;
+}
+.snow-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
+.snow-panel-title { font-size: 14px; font-weight: 600; color: var(--ink); }
+.snow-legend { display: flex; gap: 16px; font-size: 12px; color: var(--ink-40); }
+.snow-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.snow-legend i { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+/* Bar chart ------------------------------------------------ */
+.snow-bars { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 10px; align-items: end; height: 168px; }
+.snow-bar-col { display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; }
+.snow-bar-stack { width: 24px; display: flex; flex-direction: column; justify-content: flex-end; flex: 1; }
+.snow-bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 2px; }
+.snow-bar.actual   { background: var(--accent-blue); }
+.snow-bar.forecast { background: var(--accent-blue); opacity: .4; border-radius: 4px; }
+.snow-bar-label { font-size: 12px; color: var(--ink-40); }
+
+/* Donut ---------------------------------------------------- */
+.snow-donut-wrap { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; }
+.snow-donut { width: 120px; height: 120px; border-radius: 50%; position: relative; flex: 0 0 auto; }
+.snow-donut::after {
+  content: ""; position: absolute; inset: 18px; border-radius: 50%; background: var(--snow-panel-2);
+}
+.snow-list { flex: 1; min-width: 160px; display: flex; flex-direction: column; gap: 14px; }
+.snow-list-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+.snow-list-row .k { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
+.snow-list-row .k i { width: 8px; height: 8px; border-radius: 50%; }
+.snow-list-row .v { color: var(--ink); font-weight: 500; }
+
+/* Horizontal progress list --------------------------------- */
+.snow-hbars { display: flex; flex-direction: column; gap: 16px; }
+.snow-hbar-row { display: flex; align-items: center; gap: 12px; font-size: 13px; }
+.snow-hbar-row .name { width: 130px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snow-hbar-track { flex: 1; height: 6px; border-radius: 6px; background: var(--ink-20); overflow: hidden; }
+.snow-hbar-fill { height: 100%; border-radius: 6px; background: var(--ink); }
+.snow-hbar-row .val { width: 64px; text-align: right; color: var(--ink-40); }
+
+/* Table ---------------------------------------------------- */
+.snow-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.snow-table th {
+  text-align: left; font-weight: 400; color: var(--ink-40);
+  padding: 8px 12px; border-bottom: 1px solid var(--line);
+}
+.snow-table td { padding: 12px; border-bottom: 1px solid var(--line); color: var(--ink); }
+.snow-table tr:last-child td { border-bottom: none; }
+.snow-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink); }
+.snow-pill i { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Right rail ----------------------------------------------- */
+.snow-rail { border-left: 1px solid var(--line); padding: 20px; display: flex; flex-direction: column; gap: 24px; }
+.snow-rail-title { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 12px; }
+.snow-feed { display: flex; flex-direction: column; gap: 14px; }
+.snow-feed-item { display: flex; gap: 10px; align-items: flex-start; }
+.snow-feed-ic {
+  width: 24px; height: 24px; border-radius: 8px; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center; font-size: 12px;
+}
+.snow-feed-ic.blue   { background: var(--accent-mint); }
+.snow-feed-ic.purple { background: var(--tint-purple); }
+.snow-feed-ic.mint   { background: #DEF8EE; }
+.snow-feed-body { min-width: 0; }
+.snow-feed-text { font-size: 13px; color: var(--ink); line-height: 1.35; }
+.snow-feed-time { font-size: 12px; color: var(--ink-40); margin-top: 2px; }
+.snow-contact { display: flex; align-items: center; gap: 10px; }
+.snow-contact .ava {
+  width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: #fff;
+}
+.snow-contact .nm { font-size: 13px; color: var(--ink); }
+
+/* Buttons -------------------------------------------------- */
+.snow-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--snow-panel); border: none; border-radius: 8px;
+  padding: 6px 12px; font: inherit; font-size: 13px; color: var(--ink);
+  cursor: pointer; transition: background .15s; text-decoration: none;
+}
+.snow-btn:hover { background: var(--snow-hover); }
+.snow-btn--ink { background: var(--ink); color: #fff; }
+.snow-btn--ink:hover { background: #000; }
+.snow-btn form { margin: 0; }
+
+.snow-flash { font-size: 13px; padding: 10px 28px; }
+.snow-flash.notice { background: #DEF8EE; color: #1C4A2E; }
+.snow-flash.alert  { background: #FDE7E7; color: #7A1F1F; }
+
+/* Forms ---------------------------------------------------- */
+.snow-form { max-width: 520px; display: flex; flex-direction: column; gap: 20px; }
+.snow-field { display: flex; flex-direction: column; gap: 6px; }
+.snow-field label { font-size: 13px; color: var(--ink-80); font-weight: 500; }
+.snow-field .hint { font-size: 12px; color: var(--ink-40); }
+.snow-input {
+  width: 100%; background: var(--snow-bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 14px; color: var(--ink);
+  transition: border-color .15s, box-shadow .15s;
+}
+.snow-input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(149,164,252,.18); }
+.snow-form-actions { display: flex; gap: 10px; margin-top: 4px; }
+.snow-errors { background: #FDE7E7; border-radius: 8px; padding: 12px 14px; color: #7A1F1F; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
+
+/* Status badges -------------------------------------------- */
+.snow-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; padding: 3px 10px; border-radius: 999px; font-weight: 500;
+}
+.snow-badge.pending   { background: #FFF3DA; color: #8A5A00; }
+.snow-badge.validated { background: #DEF8EE; color: #1C4A2E; }
+.snow-badge.dismissed { background: var(--snow-panel); color: var(--ink-40); }
+
+.snow-stack { display: flex; flex-direction: column; gap: 16px; }

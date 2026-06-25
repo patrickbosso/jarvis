@@ -1,52 +1,39 @@
-<div class="max-w-lg mx-auto">
-  <h1 class="text-2xl font-bold text-white mb-6">Règles budgétaires</h1>
+<% content_for :breadcrumb, "Budget" %>
 
-  <%= form_with model: @budget_rule, url: budget_rule_path, method: :patch, class: "space-y-5" do |f| %>
-    <% if @budget_rule.errors.any? %>
-      <div class="bg-red-900 border border-red-700 rounded-lg px-4 py-3 text-red-100 text-sm">
-        <% @budget_rule.errors.full_messages.each do |msg| %>
-          <p><%= msg %></p>
-        <% end %>
-      </div>
-    <% end %>
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
+  <h1 class="snow-page-title" style="margin:0;">Règles budgétaires</h1>
+</div>
 
-    <div class="bg-gray-900 rounded-xl border border-gray-800 p-6 space-y-4">
-      <div>
-        <%= f.label :salary_target_cents, "Salaire mensuel cible SAS → EI (€)", class: "block text-sm text-gray-400 mb-1" %>
-        <%= f.number_field :salary_target_cents, value: @budget_rule.salary_target_cents.to_i / 100, step: 1, min: 0,
-            class: "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500",
-            data: { cents_field: true } %>
-        <p class="text-xs text-gray-500 mt-1">Entrez le montant en euros</p>
-      </div>
-
-      <div>
-        <%= f.label :mortgage_amount_cents, "Remboursement crédit immo mensuel (€)", class: "block text-sm text-gray-400 mb-1" %>
-        <%= f.number_field :mortgage_amount_cents, value: @budget_rule.mortgage_amount_cents.to_i / 100, step: 1, min: 0,
-            class: "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" %>
-      </div>
-
-      <div>
-        <%= f.label :living_expenses_cents, "Train de vie mensuel (€)", class: "block text-sm text-gray-400 mb-1" %>
-        <%= f.number_field :living_expenses_cents, value: @budget_rule.living_expenses_cents.to_i / 100, step: 1, min: 0,
-            class: "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" %>
-      </div>
-
-      <div>
-        <%= f.label :savings_target_cents, "Épargne mensuelle cible (€)", class: "block text-sm text-gray-400 mb-1" %>
-        <%= f.number_field :savings_target_cents, value: @budget_rule.savings_target_cents.to_i / 100, step: 1, min: 0,
-            class: "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" %>
-      </div>
-
-      <div>
-        <%= f.label :freelance_budget_cents, "Budget freelance mensuel (€)", class: "block text-sm text-gray-400 mb-1" %>
-        <%= f.number_field :freelance_budget_cents, value: @budget_rule.freelance_budget_cents.to_i / 100, step: 1, min: 0,
-            class: "w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-indigo-500" %>
-      </div>
-    </div>
-
-    <div class="flex gap-3">
-      <%= f.submit "Enregistrer", class: "px-6 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition cursor-pointer" %>
-      <%= link_to "Annuler", root_path, class: "px-6 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 rounded-lg font-medium transition" %>
+<%= form_with model: @budget_rule, url: budget_rule_path, method: :patch, class: "snow-form" do |f| %>
+  <% if @budget_rule.errors.any? %>
+    <div class="snow-errors">
+      <% @budget_rule.errors.full_messages.each do |msg| %>
+        <span><%= msg %></span>
+      <% end %>
     </div>
   <% end %>
-</div>
+
+  <div class="snow-panel">
+    <div class="snow-stack">
+      <% fields = [
+           [:salary_target_cents,    "Salaire mensuel cible SAS → EI (€)", "Entrez le montant en euros"],
+           [:mortgage_amount_cents,  "Remboursement crédit immo mensuel (€)", nil],
+           [:living_expenses_cents,  "Train de vie mensuel (€)", nil],
+           [:savings_target_cents,   "Épargne mensuelle cible (€)", nil],
+           [:freelance_budget_cents, "Budget freelance mensuel (€)", nil]
+         ] %>
+      <% fields.each do |attr, label, hint| %>
+        <div class="snow-field">
+          <%= f.label attr, label %>
+          <%= f.number_field attr, value: @budget_rule.public_send(attr).to_i / 100, step: 1, min: 0, class: "snow-input" %>
+          <% if hint %><span class="hint"><%= hint %></span><% end %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+
+  <div class="snow-form-actions">
+    <%= f.submit "Enregistrer", class: "snow-btn snow-btn--ink" %>
+    <%= link_to "Annuler", root_path, class: "snow-btn" %>
+  </div>
+<% end %>

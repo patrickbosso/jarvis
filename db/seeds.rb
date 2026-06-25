@@ -32,6 +32,28 @@ Account.find_or_create_by!(user: user, source: "trade_republic_pea") do |a|
   a.fetched_at = 3.hours.ago
 end
 
+# Invoices — historical paid (Jan–May 2026)
+[
+  { client: "Collectif Nord",   amount: 3_200_00, ext: "INV-2026-001", month: 1 },
+  { client: "Bureau Éclat",     amount: 5_500_00, ext: "INV-2026-002", month: 1 },
+  { client: "Agence Lumière",   amount: 4_200_00, ext: "INV-2026-007", month: 2 },
+  { client: "Maison Cléa",      amount: 2_800_00, ext: "INV-2026-008", month: 2 },
+  { client: "Studio Moka",      amount: 6_000_00, ext: "INV-2026-015", month: 3 },
+  { client: "Fondation Artes",  amount: 1_900_00, ext: "INV-2026-016", month: 3 },
+  { client: "Collectif Nord",   amount: 4_500_00, ext: "INV-2026-023", month: 4 },
+  { client: "Agence Lumière",   amount: 3_100_00, ext: "INV-2026-024", month: 4 },
+  { client: "Bureau Éclat",     amount: 2_400_00, ext: "INV-2026-031", month: 5 },
+  { client: "Maison Cléa",      amount: 5_800_00, ext: "INV-2026-032", month: 5 }
+].each do |inv|
+  Invoice.find_or_create_by!(user: user, external_id: inv[:ext]) do |i|
+    i.client_name = inv[:client]
+    i.amount_cents = inv[:amount]
+    i.status = "paid"
+    i.issued_at = Date.new(2026, inv[:month], 15)
+    i.due_date = Date.new(2026, inv[:month], 15) + 30
+  end
+end
+
 # Invoices — paid this month
 [
   { client: "Agence Lumière", amount: 4_800_00, ext: "INV-2026-041" },
