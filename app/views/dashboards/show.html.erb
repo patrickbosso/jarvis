@@ -165,6 +165,95 @@
   </div>
 </div>
 
+<%# ===== Investment tracker (Trade Republic style) ===== %>
+<% if @investments.any? %>
+  <h2 class="snow-page-title" style="margin-bottom:16px;">Investissements · PEA</h2>
+  <div class="snow-invest-grid">
+    <% @investments.each do |inv| %>
+      <%
+        windows      = inv.available_windows
+        has_position = inv.shares.to_f > 0
+      %>
+      <div class="snow-invest" data-controller="investment-chart">
+        <div>
+          <div class="snow-invest-top">
+            <div class="snow-invest-name"><%= inv.name %></div>
+            <span class="snow-invest-menu">⋯</span>
+          </div>
+          <div class="snow-invest-isin"><%= inv.isin %> · <%= inv.yahoo_ticker %></div>
+        </div>
+
+        <% if inv.has_chart? %>
+          <%# price + per-window performance (toggled) %>
+          <div class="snow-invest-quote">
+            <span class="snow-invest-price"><%= number_to_currency(inv.price_euros, unit: "€", separator: ",", delimiter: " ", format: "%n %u", precision: 2) %></span>
+            <% windows.each_with_index do |(key, _label), i| %>
+              <% pct = inv.window_pct(key).to_f %>
+              <% dir = pct > 0 ? "up" : (pct < 0 ? "down" : "flat") %>
+              <span class="snow-invest-perf <%= dir %>" data-investment-chart-target="perf"
+                    data-window="<%= key %>" <%= "hidden" unless i.zero? %>>
+                <%= dir == "up" ? "▲" : (dir == "down" ? "▼" : "") %>
+                <%= pct >= 0 ? "+" : "" %><%= pct %> %
+              </span>
+            <% end %>
+          </div>
+
+          <%# window tabs %>
+          <div class="snow-invest-tabs">
+            <% windows.each_with_index do |(key, label), i| %>
+              <button type="button" class="snow-invest-tab <%= 'is-active' if i.zero? %>"
+                      data-investment-chart-target="tab" data-window="<%= key %>"
+                      data-action="investment-chart#select"><%= label %></button>
+            <% end %>
+          </div>
+
+          <%# chart panes (one per window, toggled) %>
+          <div>
+            <% windows.each_with_index do |(key, _label), i| %>
+              <% pct = inv.window_pct(key).to_f %>
+              <div class="snow-invest-pane" data-investment-chart-target="pane"
+                   data-window="<%= key %>" <%= "hidden" unless i.zero? %>>
+                <div class="snow-spark-wrap <%= pct >= 0 ? 'up' : 'down' %>"
+                     data-action="mousemove->investment-chart#hover mouseleave->investment-chart#leave"
+                     data-prices="<%= inv.window_prices(key).to_json %>"
+                     data-times="<%= inv.window_times(key).to_json %>"
+                     data-window="<%= key %>">
+                  <%= sparkline_svg(inv.window_prices(key), up: pct >= 0) %>
+                  <div class="snow-cross"></div>
+                  <div class="snow-dot"></div>
+                  <div class="snow-tip"></div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <p style="font-size:13px; color:var(--ink-40); padding:24px 0;">Cours non disponible — synchronisation en cours.</p>
+        <% end %>
+
+        <%# position footer (only once shares are set) %>
+        <% if has_position %>
+          <div class="snow-invest-position">
+            <div>
+              <div class="snow-invest-pos-label">Valeur position · <%= inv.shares.to_f.round(4) %> parts</div>
+              <div class="snow-invest-pos-value"><%= eur(inv.current_value_cents) %></div>
+            </div>
+            <div class="snow-invest-pnl">
+              <div class="snow-invest-pos-label">P&L total</div>
+              <div class="snow-invest-pos-value" style="color: <%= inv.pnl_cents >= 0 ? 'var(--pos)' : 'var(--neg)' %>;">
+                <%= inv.pnl_cents >= 0 ? "+" : "" %><%= eur(inv.pnl_cents) %> (<%= inv.pnl_pct >= 0 ? "+" : "" %><%= inv.pnl_pct %>%)
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+        <div class="snow-invest-stale">
+          <%= inv.last_fetched_at ? "Mis à jour #{time_ago_in_words(inv.last_fetched_at)}" : "Jamais synchronisé" %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% end %>
+
 <%# ===== Right rail ===== %>
 <% content_for :rail do %>
   <div>

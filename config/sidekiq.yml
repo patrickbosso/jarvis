@@ -28,3 +28,9 @@
     class: DailySummaryJob
     args: [1]
     description: "Send daily Jarvis summary at 8am"
+
+  sync_investments:
+    cron: "*/30 8-18 * * 1-5"
+    class: SyncInvestmentsJob
+    args: [1]
+    description: "Sync ETF prices every 30 min on market days (Mon-Fri 8h-18h)"

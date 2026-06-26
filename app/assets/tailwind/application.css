@@ -281,3 +281,78 @@ body {
 .snow-badge.dismissed { background: var(--snow-panel); color: var(--ink-40); }
 
 .snow-stack { display: flex; flex-direction: column; gap: 16px; }
+
+/* Investment cards (Trade Republic inspired) --------------- */
+.snow-invest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 28px; }
+@media (max-width: 1100px) { .snow-invest-grid { grid-template-columns: 1fr; } }
+.snow-invest {
+  background: var(--snow-bg); border-radius: 16px; padding: 24px;
+  border: 1px solid var(--line-strong); border-bottom-width: 4px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* header: monogram + menu */
+.snow-invest-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.snow-invest-top .snow-invest-menu { flex: 0 0 auto; }
+.snow-invest-logo {
+  width: 40px; height: 40px; border-radius: 12px; background: var(--ink);
+  color: #fff; display: inline-flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; letter-spacing: -0.02em;
+}
+.snow-invest-menu {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--snow-panel);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: var(--ink-40); font-size: 16px;
+}
+
+.snow-invest-name { font-size: 20px; font-weight: 700; color: var(--ink); line-height: 1.2; letter-spacing: -0.01em; }
+.snow-invest-isin { font-size: 12px; color: var(--ink-40); letter-spacing: 0.03em; margin-top: 4px; }
+
+.snow-invest-quote { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.snow-invest-price { font-size: 26px; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1; }
+.snow-invest-perf { font-size: 14px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.snow-invest-perf.up   { color: var(--pos); }
+.snow-invest-perf.down { color: var(--neg); }
+.snow-invest-perf.flat { color: var(--ink-40); }
+
+/* window tabs */
+.snow-invest-tabs { display: flex; gap: 4px; }
+.snow-invest-tab {
+  flex: 1; border: none; background: transparent; cursor: pointer;
+  font: inherit; font-size: 13px; font-weight: 500; color: var(--ink-40);
+  padding: 6px 8px; border-radius: 8px; transition: background .15s, color .15s;
+}
+.snow-invest-tab:hover { color: var(--ink); }
+.snow-invest-tab.is-active { background: var(--snow-panel); color: var(--ink); }
+
+/* chart */
+.snow-spark { display: block; overflow: visible; }
+.snow-invest-pane[hidden] { display: none; }
+
+/* hover crosshair + tooltip (Google-Finance style) */
+.snow-spark-wrap { position: relative; cursor: crosshair; }
+.snow-spark-wrap.up   { color: var(--pos); }
+.snow-spark-wrap.down { color: var(--neg); }
+.snow-cross {
+  position: absolute; top: 0; bottom: 0; width: 1px;
+  background: var(--ink-20); pointer-events: none; display: none;
+  transform: translateX(-0.5px);
+}
+.snow-dot {
+  position: absolute; width: 9px; height: 9px; border-radius: 50%;
+  background: currentColor; border: 2px solid var(--snow-bg);
+  pointer-events: none; display: none; transform: translate(-50%, -50%);
+}
+.snow-tip {
+  position: absolute; top: -6px; transform: translate(-50%, -100%);
+  background: var(--ink); color: #fff; border-radius: 8px;
+  padding: 4px 9px; font-size: 12px; font-weight: 500; white-space: nowrap;
+  pointer-events: none; display: none; z-index: 2;
+}
+
+/* position footer */
+.snow-invest-position { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 16px; border-top: 1px solid var(--line); }
+.snow-invest-pos-label { font-size: 12px; color: var(--ink-40); margin-bottom: 2px; }
+.snow-invest-pos-value { font-size: 16px; font-weight: 600; color: var(--ink); }
+.snow-invest-pnl { text-align: right; }
+.snow-invest-stale { font-size: 11px; color: var(--ink-40); }

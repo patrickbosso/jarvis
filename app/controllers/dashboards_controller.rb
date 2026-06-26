@@ -13,6 +13,7 @@ class DashboardsController < ApplicationController
     @ca_previsionnel = @invoices_sent.sum(:amount_cents)
     @ca_overdue = @invoices_overdue.sum(:amount_cents)
 
+    @investments = current_user.investments.order(:name)
     @suggestion = current_user.transfer_suggestions.pending.order(suggested_at: :desc).first
     @budget_rule = current_user.budget_rule
 

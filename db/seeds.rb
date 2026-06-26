@@ -116,6 +116,31 @@ BudgetRule.find_or_create_by!(user: user) do |b|
   b.freelance_budget_cents = 860_00
 end
 
+# Investments — PEA ETFs (update shares + avg_price to reflect real position)
+[
+  {
+    name:         "Amundi PEA Nasdaq-100 UCITS ETF Acc",
+    isin:         "FR0011871128",
+    yahoo_ticker: "PUST.PA",
+    shares:       0,
+    avg_price_cents: 0
+  },
+  {
+    name:         "iShares MSCI World Swap PEA UCITS ETF EUR (Acc)",
+    isin:         "IE000Y7KKL60",
+    yahoo_ticker: "WPEA.PA",
+    shares:       0,
+    avg_price_cents: 0
+  }
+].each do |inv|
+  Investment.find_or_initialize_by(user: user, isin: inv[:isin]).update!(
+    name:            inv[:name],
+    yahoo_ticker:    inv[:yahoo_ticker],
+    shares:          inv[:shares],
+    avg_price_cents: inv[:avg_price_cents]
+  )
+end
+
 # Transfer suggestion — reset to pending on every seed so the demo card reappears
 TransferSuggestion.find_or_initialize_by(user: user, trigger: "monthly_review").update!(
   status: "pending",

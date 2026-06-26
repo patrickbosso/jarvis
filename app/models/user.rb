@@ -10,4 +10,5 @@ class User < ApplicationRecord
   has_many :projects
   has_many :transactions
   has_many :transfer_suggestions
+  has_many :investments
 end
