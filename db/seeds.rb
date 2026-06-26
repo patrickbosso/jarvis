@@ -116,13 +116,13 @@ BudgetRule.find_or_create_by!(user: user) do |b|
   b.freelance_budget_cents = 860_00
 end
 
-# Transfer suggestion
-TransferSuggestion.find_or_create_by!(user: user, trigger: "monthly_review") do |s|
-  s.status = "pending"
-  s.suggested_at = Time.current
-  s.transfers_json = [
+# Transfer suggestion — reset to pending on every seed so the demo card reappears
+TransferSuggestion.find_or_initialize_by(user: user, trigger: "monthly_review").update!(
+  status: "pending",
+  suggested_at: Time.current,
+  transfers_json: [
     { label: "Virement épargne",      amount_cents: 600_00 },
     { label: "Provision charges URSSAF", amount_cents: 430_00 },
     { label: "Remboursement crédit",  amount_cents: 1_240_00 }
   ].to_json
-end
+)

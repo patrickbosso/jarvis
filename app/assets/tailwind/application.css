@@ -17,6 +17,7 @@
   --ink-40: rgba(28, 28, 28, 0.40);
   --ink-20: rgba(28, 28, 28, 0.20);
   --line: rgba(28, 28, 28, 0.10);
+  --line-strong: rgba(28, 28, 28, 0.16);   /* darker card border */
 
   /* KPI card tints */
   --tint-blue: #E6F1FD;
@@ -142,6 +143,9 @@ body {
   border-radius: 16px; padding: 24px; min-height: 112px;
   display: flex; flex-direction: column; gap: 8px;
   transition: transform .2s;
+  /* darker side borders + wider bottom border */
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 4px;
 }
 .snow-kpi:hover { transform: translateY(-2px); }
 .snow-kpi--blue   { background: var(--tint-blue); }
@@ -164,6 +168,9 @@ body {
 
 .snow-panel {
   background: var(--snow-panel-2); border-radius: 16px; padding: 24px;
+  /* darker side borders + wider bottom border */
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 4px;
 }
 .snow-panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 12px; flex-wrap: wrap; }
 .snow-panel-title { font-size: 14px; font-weight: 600; color: var(--ink); }
@@ -260,7 +267,7 @@ body {
   border-radius: 8px; padding: 10px 12px; font: inherit; font-size: 14px; color: var(--ink);
   transition: border-color .15s, box-shadow .15s;
 }
-.snow-input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(149,164,252,.18); }
+.snow-input:focus { outline: none; border-color: var(--accent-purple); }
 .snow-form-actions { display: flex; gap: 10px; margin-top: 4px; }
 .snow-errors { background: #FDE7E7; border-radius: 8px; padding: 12px 14px; color: #7A1F1F; font-size: 13px; display: flex; flex-direction: column; gap: 4px; }
 
